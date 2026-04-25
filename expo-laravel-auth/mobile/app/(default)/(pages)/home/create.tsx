@@ -14,6 +14,46 @@ export default function Create() {
   const [loading, setLoading] = useState(false);
   const { createBlog } = useAuth();
 
+  const [errors, setErrors] = useState<{
+    title?: string;
+    description?: string;
+    image?: string;
+  }>({});
+
+  const validate = () => {
+    const newErrors: typeof errors = {};
+
+    if (!title.trim()) {
+      newErrors.title = "Title is required.";
+    } else if (title.trim().length < 5) {
+      newErrors.title = "Title must be at least 5 characters.";
+    } else if (title.trim().length > 100) {
+      newErrors.title = "Title must be under 100 characters.";
+    }
+
+    if (!description.trim()) {
+      newErrors.description = "Description is required.";
+    } else if (description.trim().length < 20) {
+      newErrors.description = "Description must be at least 20 characters.";
+    } else if (description.trim().length > 2000) {
+      newErrors.description = "Description must be under 2000 characters.";
+    }
+
+    if (!image) {
+      newErrors.image = "Please select an image.";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // Clear a specific field error when the user starts typing
+  const clearError = (field: keyof typeof errors) => {
+    if (errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: undefined }));
+    }
+  };
+
   const pickImage = async () => {
     const { granted } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!granted) {
@@ -30,15 +70,12 @@ export default function Create() {
 
     if (!result.canceled) {
       setImage(result.assets[0].uri);
+      clearError("image");
     }
   };
 
   const handleCreateBlog = async () => {
-
-    if (!title.trim()) { Alert.alert("Validation", "Title is required."); return; }
-    if (!description.trim()) { Alert.alert("Validation", "Description is required."); return; }
-    if (!image) { Alert.alert("Validation", "Please select an image."); return; }
-
+    if (!validate()) return;
 
     setLoading(true);
     try {
@@ -47,15 +84,15 @@ export default function Create() {
       formData.append("description", description.trim());
 
       if (Platform.OS === "web") {
-        const response = await fetch(image);
+        const response = await fetch(image!);
         const blob = await response.blob();
         const file = new File([blob], "blog.jpg", { type: blob.type || "image/jpeg" });
         formData.append("image", file);
       } else {
-        const filename = image.split("/").pop() ?? "blog.jpg";
+        const filename = image!.split("/").pop() ?? "blog.jpg";
         const ext = filename.split(".").pop()?.toLowerCase() ?? "jpg";
         formData.append("image", {
-          uri: image,
+          uri: image!,
           name: filename,
           type: ext === "png" ? "image/png" : "image/jpeg",
         } as any);
@@ -66,14 +103,15 @@ export default function Create() {
       setTitle("");
       setDescription("");
       setImage(null);
+      setErrors({});
       router.replace("/(default)/(tabs)/home");
-
-      } catch (error) {
-        console.log("Error in handleCreateBlog:", error);
-      } finally {
-        setLoading(false);
-      }
-};
+    } catch (error) {
+      console.log("Error in handleCreateBlog:", error);
+      Alert.alert("Error", "Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <ScrollView
@@ -91,29 +129,47 @@ export default function Create() {
           <Text className="text-gray-700 font-semibold mb-1 ml-1">Title</Text>
           <TextInput
             value={title}
-            onChangeText={setTitle}
-            className="h-12 px-4 border border-gray-200 rounded-xl bg-gray-50"
-            placeholder="Enter blog title"
+            onChangeText={(val) => { setTitle(val); clearError("title"); }}
+            className={`h-12 px-4 border rounded-xl bg-gray-50 ${
+              errors.title ? "border-red-400" : "border-gray-200"
+            }`}
+            placeholder="Enter title"
           />
+          {errors.title && (
+            <Text className="text-red-500 text-xs mt-1 ml-1">{errors.title}</Text>
+          )}
+          <Text className="text-gray-400 text-xs mt-1 ml-1 text-right">
+          </Text>
         </View>
 
+        {/* Description */}
         <View className="mb-6">
           <Text className="text-gray-700 font-semibold mb-1 ml-1">Description</Text>
           <TextInput
             value={description}
-            onChangeText={setDescription}
-            className="px-4 py-3 border border-gray-200 rounded-xl bg-gray-50"
+            onChangeText={(val) => { setDescription(val); clearError("description"); }}
+            className={`px-4 py-3 border rounded-xl bg-gray-50 ${
+              errors.description ? "border-red-400" : "border-gray-200"
+            }`}
             placeholder="Enter description"
             multiline
             numberOfLines={4}
             textAlignVertical="top"
           />
+          {errors.description && (
+            <Text className="text-red-500 text-xs mt-1 ml-1">{errors.description}</Text>
+          )}
+          <Text className="text-gray-400 text-xs mt-1 ml-1 text-right">
+          </Text>
         </View>
 
+        {/* Image Picker */}
         <View className="items-center mb-8">
           <TouchableOpacity
             onPress={pickImage}
-            className="w-80 h-52 rounded-2xl bg-gray-200 justify-center items-center border-2 border-dashed border-blue-400 overflow-hidden"
+            className={`w-80 h-52 rounded-2xl bg-gray-200 justify-center items-center border-2 border-dashed overflow-hidden ${
+              errors.image ? "border-red-400" : "border-blue-400"
+            }`}
           >
             {image ? (
               <Image
@@ -129,9 +185,12 @@ export default function Create() {
               </View>
             )}
           </TouchableOpacity>
+          {errors.image && (
+            <Text className="text-red-500 text-xs mt-2">{errors.image}</Text>
+          )}
         </View>
 
-
+        {/* Submit */}
         <TouchableOpacity
           onPress={handleCreateBlog}
           disabled={loading}

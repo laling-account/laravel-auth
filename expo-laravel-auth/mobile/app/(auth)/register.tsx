@@ -71,13 +71,11 @@ export default function Register() {
 
     if (form.image) {
       if (Platform.OS === "web") {
-        // ✅ Web: fetch the blob URI and append as a real File
         const response = await fetch(form.image);
         const blob = await response.blob();
         const file = new File([blob], "avatar.jpg", { type: blob.type || "image/jpeg" });
         formData.append("image", file);
       } else {
-        // ✅ Native (iOS/Android): use the { uri, name, type } object
         const filename = form.image.split("/").pop() ?? "avatar.jpg";
         const ext = filename.split(".").pop()?.toLowerCase() ?? "jpg";
         formData.append("image", {

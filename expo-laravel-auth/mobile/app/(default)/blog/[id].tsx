@@ -10,7 +10,7 @@ import { useLocalSearchParams, router } from "expo-router";
 import { useState, useEffect } from "react";
 import axios from "@/api/axios";
 
-const BASE_URL = "http://192.168.8.106:8000/storage/blogs";
+const BASE_URL = "http://192.168.0.77:8000/storage/blogs";
 
 interface Blog {
   id: number;

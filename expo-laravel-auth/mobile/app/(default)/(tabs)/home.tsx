@@ -1,4 +1,4 @@
-import { View, Text, Image, Pressable, ScrollView, ActivityIndicator, RefreshControl } from "react-native";
+import { View, Text, Image, Pressable, ScrollView, ActivityIndicator, RefreshControl, TouchableOpacity } from "react-native";
 import React, { useEffect, useState } from "react";
 import axios from "@/api/axios";
 import { router } from "expo-router";
@@ -17,15 +17,14 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  const BASE_URL = "http://192.168.8.106:8000"; 
+  const BASE_URL = "http://192.168.0.77:8000";
+
   const getBlog = async () => {
     try {
       setLoading(true);
       const { data } = await axios.get(`${BASE_URL}/api/blogs`);
-      // Handle different response structures
       const blogsData = data.blogs || data.data || data;
       setBlogs(Array.isArray(blogsData) ? blogsData : []);
-      console.log("Fetched blogs:", blogsData);
     } catch (error) {
       console.log("Error fetching blogs:", error);
     } finally {
@@ -73,72 +72,70 @@ export default function Home() {
   }
 
   return (
-    <ScrollView
-      showsVerticalScrollIndicator={false}
-      showsHorizontalScrollIndicator={false}
-      className="flex-1 bg-gray-50"
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }
-    >
-      <View className="p-4">
-        {blogs.map((blog) => {
-          const imageUrl = getImageUrl(blog.image);
-          
-          return (
-            <Pressable
-              onPress={() => router.push(`/(default)/blog/${blog.id}`)}
-              key={blog.id}
-              className="bg-white rounded-xl shadow-sm mb-4 overflow-hidden"
-            >
-              {/* Blog Image */}
-              {imageUrl ? (
-                <View style={{ width: "100%", aspectRatio: 16 / 9, overflow: "hidden" }}>
-                  <Image
-                    source={{ uri: imageUrl }}
-                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                    resizeMode="cover"
-                    onError={(e) => console.log("Image error for blog", blog.id, e.nativeEvent.error)}
-                  />
-                </View>
-              ) : (
-                <View style={{ width: "100%", aspectRatio: 16 / 9 }} className="bg-gray-200 items-center justify-center">
-                  <Text className="text-gray-400">No Image Available</Text>
-                </View>
-              )}
-              
-              {/* Blog Content */}
-              <View className="p-4">
-                <Text className="text-xl font-bold text-gray-800 mb-2">
-                  {blog.title}
-                </Text>
-                <Text className="text-gray-600" numberOfLines={2}>
-                  {blog.description}
-                </Text>
-                
-                {/* Optional: Add metadata */}
-                <View className="flex-row justify-between items-center mt-3">
-                  <View className="flex-row items-center">
-                    <View className="w-6 h-6 rounded-full bg-blue-500 items-center justify-center mr-1">
-                      <Text className="text-white text-xs font-bold">
-                        {blog.user_id?.toString().charAt(0) || 'U'}
-                      </Text>
-                    </View>
-                    <Text className="text-gray-400 text-xs">
-                      User ID: {blog.user_id}
-                    </Text>
+    <View className="flex-1 bg-purple-100">
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        showsHorizontalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      >
+        <View className="p-4">
+          {blogs.map((blog) => {
+            const imageUrl = getImageUrl(blog.image);
+            return (
+              <Pressable
+                onPress={() => router.push(`/(default)/blog/${blog.id}`)}
+                key={blog.id}
+                className="bg-white rounded-xl shadow-sm mb-4 overflow-hidden"
+              >
+                {/* Blog Image */}
+                {imageUrl ? (
+                  <View style={{ width: "100%", aspectRatio: 16 / 9, overflow: "hidden" }}>
+                    <Image
+                      source={{ uri: imageUrl }}
+                      style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                      resizeMode="cover"
+                      onError={(e) => console.log("Image error for blog", blog.id, e.nativeEvent.error)}
+                    />
                   </View>
-                  {blog.created_at && (
-                    <Text className="text-gray-400 text-xs">
-                      {new Date(blog.created_at).toLocaleDateString()}
-                    </Text>
-                  )}
+                ) : (
+                  <View style={{ width: "100%", aspectRatio: 16 / 9 }} className="bg-gray-200 items-center justify-center">
+                    <Text className="text-gray-400">No Image Available</Text>
+                  </View>
+                )}
+
+                {/* Blog Content */}
+                <View className="p-4">
+                  <Text className="text-xl font-bold text-gray-800 mb-2">{blog.title}</Text>
+                  <Text className="text-gray-600" numberOfLines={2}>{blog.description}</Text>
+                  <View className="flex-row justify-between items-center mt-3">
+                    <View className="flex-row items-center">
+                      {/* <View className="w-6 h-6 rounded-full bg-blue-500 items-center justify-center mr-1">
+                        <Text className="text-white text-xs font-bold">
+                          {blog.id?.toString().charAt(0) || 'U'}
+                        </Text>
+                      </View> */}
+                      {/* <Text className="text-gray-400 text-xs">User ID: {blog.user_id}</Text> */}
+                    </View>
+                    {/* {blog.created_at && (
+                      <Text className="text-gray-400 text-xs">
+                        {new Date(blog.created_at).toLocaleDateString()}
+                      </Text>
+                    )} */}
+                  </View>
                 </View>
-              </View>
-            </Pressable>
-          );
-        })}
-      </View>
-    </ScrollView>
+              </Pressable>
+            );
+          })}
+        </View>
+      </ScrollView>
+
+      <TouchableOpacity
+        onPress={() => router.push("/(default)/(pages)/home/create")}
+        className="absolute bottom-6 right-6 w-14 h-14 rounded-full items-center justify-center"
+        style={{ elevation: 5, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.3, shadowRadius: 4 }}
+      >
+        <Text className="text-blue text-3xl font-light leading-none">+</Text>
+      </TouchableOpacity>
+    </View>
   );
 }

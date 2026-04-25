@@ -8,11 +8,12 @@ class Blog extends Model
 {
     protected $fillable = [
         'user_id',
-        'title',
+        'title', 
+        'description',
         'image',
-        'description'
     ];
-     public function user()
+
+    public function user()
     {
         return $this->belongsTo(User::class);
     }

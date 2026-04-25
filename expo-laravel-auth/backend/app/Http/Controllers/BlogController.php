@@ -26,9 +26,7 @@ class BlogController extends Controller
             'image'       => 'required|image|max:2048',
         ]);
 
-        if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('blogs', 'public');
-        }
+        $path = $request->file('image')->store('blogs', 'public');
 
         Blog::create([
             'title' => $request->title,

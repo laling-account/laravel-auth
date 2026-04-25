@@ -20,7 +20,7 @@ class AuthController extends Controller
         'name'                  => 'required|string|max:255',
         'email'                 => 'required|email|unique:users',
         'password'              => 'required|min:8|confirmed',
-        'image'                 => 'nullable|image|max:2048',
+        'image'                 => 'required|image|max:2048',
     ]);
 
     $validated['password'] = bcrypt($validated['password']);

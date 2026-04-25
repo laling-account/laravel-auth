@@ -40,7 +40,7 @@ export default function Profile() {
   console.log("Resolved image URL:", imageUrl);
 
   return (
-    <View style={{ flex: 1 }} className="bg-gray-50">
+    <View style={{ flex: 1 }} className="bg-purple-100">
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ padding: 24, paddingBottom: 40 }}
@@ -97,9 +97,9 @@ export default function Profile() {
         {/* Logout Button */}
         <TouchableOpacity
           onPress={handleLogout}
-          className="bg-red-50 border border-red-200 h-14 rounded-xl items-center justify-center"
+          className="bg-blue-500 border border-red-200 h-14 rounded-xl items-center justify-center"
         >
-          <Text className="text-red-600 font-bold text-lg">Log Out</Text>
+          <Text className="text-white font-bold text-lg">Log Out</Text>
         </TouchableOpacity>
       </ScrollView>
     </View>
